@@ -8,8 +8,11 @@
 #import "ItemMaster.h"
 
 static ItemMaster* sharedInstance = nil;
+//static NSString *const kMyClassNotificationName = @"myClassNotificationName";
+
 
 @implementation ItemMaster
+
 {
     
     NSThread *thread;
@@ -26,6 +29,8 @@ static ItemMaster* sharedInstance = nil;
     NSDictionary *dicETN;
     NSDictionary *dicSerch;
 }
+
+@synthesize delegate;
 
 + (ItemMaster *) Instance
 {
@@ -48,6 +53,11 @@ static ItemMaster* sharedInstance = nil;
 }
 
 - (void) f_GetItemCode{
+    
+//    ViewWaitPopup *view = [[ViewWaitPopup alloc]initWithFrame:CGRectMake(0, 0, 50, 100)];
+//    [ViewController.view addSubview:view];
+    
+    
     thread = [[NSThread alloc]initWithTarget:self selector:@selector(onLoadFile) object:nil]; // 스레드를 사용하는 이유는 메인스레드에서 하면 파일읽어오는 시간 뒤에 뷰가 뜨니깐 뷰는 뷰대로 보이고 파일은 파일대로 읽도록 각자 스레드 돌게 만드는거임
     [thread start]; // thread = [[NSLoadFile alloc]initWithTarget:self selector:@selector(LoadFile2) object:nil];를 실행시키는거임
 }
@@ -95,7 +105,6 @@ static ItemMaster* sharedInstance = nil;
                         itemData.jongmokName = [tItem[1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                         itemData.jongmokMarket = [tItem[2] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                         
-                        
                         [arrayAll addObject:itemData]; // 전체
                         [dicAll setValue:itemData.jongmokCode forKey:itemData.jongmokName];
                         
@@ -115,6 +124,8 @@ static ItemMaster* sharedInstance = nil;
                             [dicETN setValue:itemData.jongmokCode forKey:itemData.jongmokName];
                         
                         }
+                        
+                        
                         else{
                             NSLog(@"남는 값이 있습니다.");
                         }
@@ -131,6 +142,15 @@ static ItemMaster* sharedInstance = nil;
     
     [thread cancel];
     thread = nil;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        // [비동기 처리 구문 작성 수행 실시]
+        [self.delegate CloseWaitPopup];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"kMyClassNotificationName" object:nil userInfo:nil];
+    });
+    
+    
 }
 
 // NSMutableArray --------------------------------------------------------------------------------------------
@@ -199,33 +219,56 @@ static ItemMaster* sharedInstance = nil;
     NSMutableArray *arrayList = [self f_GetGubunArrayList:sGubun];
     arraySerch = [[NSMutableArray alloc]init];
     dicSerch = [[NSMutableDictionary alloc]init];
-    
+
     for (int i = 0; i< [arrayList count]; i++){
-    
+        
         ItemCode *itemData = [arrayList objectAtIndex:i];
         
         NSRange serchCode = [itemData.jongmokCode rangeOfString:sText];
+        
         if (serchCode.location != NSNotFound) {
             [arraySerch addObject:itemData];
             [dicSerch setValue:itemData.jongmokCode forKey:itemData.jongmokName];
         }
-        
+    
         else {
             
-             NSRange serchName = [itemData.jongmokName rangeOfString:sText];
+            NSRange serchName = [itemData.jongmokName rangeOfString:sText];
+            
              if (serchName.location != NSNotFound) {
                  [arraySerch addObject:itemData];
                  [dicSerch setValue:itemData.jongmokCode forKey:itemData.jongmokName];
+                 
               }
+
             
              else {
-                  NSString *sTextJaum = [self GetUTF8String:sText];
-                  NSString *sListJaum = [self GetUTF8String:itemData.jongmokName];
-
-                  NSRange serchName = [sListJaum rangeOfString:sTextJaum];
-                  if (serchName.location != NSNotFound) {
-                      [arraySerch addObject:itemData];
-                      [dicSerch setValue:itemData.jongmokCode forKey:itemData.jongmokName];
+                 
+                 NSString *sTextJaum = [self GetChosugFalg:sText]; // 초성유무확인 초성이면 자기자신 반환 아니면 빈값 반환
+                
+                 if (![sTextJaum isEqualToString:@""]){ // 초성일 경우
+                     NSString *sListJaum = [self GetUTF8String_Chosung:itemData.jongmokName];
+                     NSRange serchName = [sListJaum rangeOfString:sTextJaum];
+                     
+                     if (serchName.location != NSNotFound) {
+                         [arraySerch addObject:itemData];
+                         [dicSerch setValue:itemData.jongmokCode forKey:itemData.jongmokName];
+                         
+                     }
+                 }
+                 else{ // 초성이 아닐경우
+                     
+                     NSString *sTextJaum = [self GetUTF8String:sText];
+                     
+                     NSString *sListJaum = [self GetUTF8String:itemData.jongmokName];
+                     NSRange serchName = [sListJaum rangeOfString:sTextJaum];
+                 
+                     if (serchName.location != NSNotFound) {
+                         
+                         [arraySerch addObject:itemData];
+                         [dicSerch setValue:itemData.jongmokCode forKey:itemData.jongmokName];
+                         
+                     }
                   }
               }
          }
@@ -240,8 +283,7 @@ static ItemMaster* sharedInstance = nil;
 }
 
 - (NSMutableArray*) f_GetGubunArrayList:(NSString*)sGubun{
-    
-//    NSMutableArray *arrayList = [[NSMutableArray alloc]init];
+
     NSMutableArray *arrayList;
     
     if ([sGubun isEqualToString:@"ALL"]){
@@ -260,6 +302,38 @@ static ItemMaster* sharedInstance = nil;
     return arrayList;
 }
 
+
+- (NSString *)GetChosugFalg:(NSString *)hanggulString {
+    NSString *textResult = @"";
+    for (int i=0;i<[hanggulString length];i++) {
+        NSInteger code = [hanggulString characterAtIndex:i];
+        if(code >= 12593 && code <= 12622) {
+            textResult = [NSString stringWithFormat:@"%@", hanggulString ];
+        }
+    }
+
+    return textResult;
+}
+
+- (NSString *)GetUTF8String_Chosung:(NSString *)hanggulString {
+    NSArray *chosung = [[NSArray alloc] initWithObjects:@"ㄱ",@"ㄲ",@"ㄴ",@"ㄷ",@"ㄸ",@"ㄹ",@"ㅁ",@"ㅂ",@"ㅃ",@"ㅅ",@"ㅆ",@"ㅇ",@"ㅈ",@"ㅉ",@"ㅊ",@"ㅋ",@"ㅌ",@"ㅍ",@"ㅎ",nil];
+
+    NSString *textResult = @"";
+    for (int i=0;i<[hanggulString length];i++) {
+        NSInteger code = [hanggulString characterAtIndex:i];
+        
+        if (code >= 44032 && code <= 55203) {
+            
+            NSInteger uniCode = code - 44032;
+            NSInteger chosungIndex = uniCode / 21 / 28;
+            
+            textResult = [NSString stringWithFormat:@"%@%@", textResult, [chosung objectAtIndex:chosungIndex]];
+        }
+    }
+    
+    return textResult;
+}
+
 - (NSString *)GetUTF8String:(NSString *)hanggulString {
     NSArray *chosung = [[NSArray alloc] initWithObjects:@"ㄱ",@"ㄲ",@"ㄴ",@"ㄷ",@"ㄸ",@"ㄹ",@"ㅁ",@"ㅂ",@"ㅃ",@"ㅅ",@"ㅆ",@"ㅇ",@"ㅈ",@"ㅉ",@"ㅊ",@"ㅋ",@"ㅌ",@"ㅍ",@"ㅎ",nil];
     NSArray *jungsung = [[NSArray alloc] initWithObjects:@"ㅏ",@"ㅐ",@"ㅑ",@"ㅒ",@"ㅓ",@"ㅔ",@"ㅕ",@"ㅖ",@"ㅗ",@"ㅘ",@"ㅙ",@"ㅚ",@"ㅛ",@"ㅜ",@"ㅝ",@"ㅞ",@"ㅟ",@"ㅠ",@"ㅡ",@"ㅢ",@"ㅣ",nil];
@@ -267,7 +341,9 @@ static ItemMaster* sharedInstance = nil;
     NSString *textResult = @"";
     for (int i=0;i<[hanggulString length];i++) {
         NSInteger code = [hanggulString characterAtIndex:i];
+        
         if (code >= 44032 && code <= 55203) {
+            
             NSInteger uniCode = code - 44032;
             NSInteger chosungIndex = uniCode / 21 / 28;
             NSInteger jungsungIndex = uniCode % (21 * 28) / 28;
@@ -275,6 +351,7 @@ static ItemMaster* sharedInstance = nil;
             textResult = [NSString stringWithFormat:@"%@%@%@%@", textResult, [chosung objectAtIndex:chosungIndex], [jungsung objectAtIndex:jungsungIndex], [jongsung objectAtIndex:jongsungIndex]];
         }
     }
+    
     return textResult;
 }
 

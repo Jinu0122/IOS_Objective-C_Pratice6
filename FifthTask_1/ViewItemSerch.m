@@ -56,6 +56,11 @@
     edtText = [[UITextField alloc]initWithFrame:CGRectMake(24, CGRectGetMinY(self.frame) + 110, CGRectGetMaxX(self.frame) - 48, 50)];
     [edtText setBackgroundColor:[[UIColor grayColor]colorWithAlphaComponent:0.3]];
     [edtText addTarget:self action:@selector(onEditChange:)  forControlEvents:UIControlEventEditingChanged];
+    [edtText setBorderStyle: UITextBorderStyleBezel];
+    [edtText setReturnKeyType: UIReturnKeyDone];
+    [edtText setAutocorrectionType: UITextAutocorrectionTypeNo];
+    [edtText setAutocapitalizationType:UITextAutocapitalizationTypeNone];
+    edtText.delegate = self;
     [self addSubview:edtText];
     
     btnAll = [[UIButton alloc]initWithFrame:CGRectMake(CGRectGetMinX(self.frame) + 24, CGRectGetMinY(self.frame) + 170, 70, 50)];
@@ -103,6 +108,22 @@
     [self addSubview:btnClose];
 }
 
+
+// 키패드 올라와 있을 때 다른 영역 터치 시 키패드 닫기
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+     [self endEditing:YES];
+}
+
+
+// 키보드 return key 선택 시 처리
+// 키패드를 내림 resignFirstResponder
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    
+    [textField resignFirstResponder];
+    
+    return true;
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
 {
     
@@ -117,6 +138,7 @@
     UILabel *lblCode = nil;
     UILabel *lblName = nil;
     UILabel *lblGubun = nil;
+    UIImageView *imgView = nil;
     
     
     
@@ -133,8 +155,6 @@
         [lblCode setTag:1];
         [cellTable addSubview:lblCode];
         
-        
-        
         lblName = [[UILabel alloc] initWithFrame:CGRectMake(110, 0, CGRectGetWidth(tableView.frame) - 190, 45)];
         [lblName setBackgroundColor:[[UIColor lightGrayColor]colorWithAlphaComponent:0.3]];
         [lblName setTextAlignment:NSTextAlignmentCenter];
@@ -148,12 +168,18 @@
         [lblGubun setTag:3];
         [cellTable addSubview:lblGubun];
         
+        imgView = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(tableView.frame) - 50, 10, 24 , 24)];
+        [imgView setTag:4];
+        [cellTable addSubview:imgView];
+        
+        
         
     }else{
         
         lblCode = [cellTable viewWithTag:1];
         lblName = [cellTable viewWithTag:2];
         lblGubun = [cellTable viewWithTag:3];
+        imgView = [cellTable viewWithTag:4];
         
     }
     
@@ -161,7 +187,12 @@
     
     [lblCode setText:itemData.jongmokCode];
     [lblName setText:itemData.jongmokName];
-    [lblGubun setText:[self f_GetJongMokGubunName:itemData.jongmokMarket]];
+    
+    [imgView setImage:[UIImage imageNamed:[self f_GetJongMokGubunName:itemData.jongmokMarket]]];
+
+//    [lblGubun setText:[self f_GetJongMokGubunName:itemData.jongmokMarket]];
+    
+    
     
     
     return cellTable;
@@ -174,13 +205,13 @@
     NSString *sName;
     
     if ([sValue isEqualToString:@"1"]){
-        sName = @"KOSPI";
+        sName = @"icon_K";
     }
     else if ([sValue isEqualToString:@"4"]){
-        sName = @"KOSDAQ";
+        sName = @"icon_Q";
     }
     else if ([sValue isEqualToString:@"A"]){
-        sName = @"ETN";
+        sName = @"icon_N";
     }
     
     return sName;
@@ -221,10 +252,23 @@
     }
     
     arrayList = [self f_getArrayList:itemGubun];
+
+    [self f_DataSort:arrayList];
+    
+
     
     tableCount = arrayList.count;
     
     [tableView reloadData];
+}
+
+- (NSMutableArray *) f_DataSort:(NSMutableArray *)arrayList{
+    NSArray *tempArray = [arrayList sortedArrayUsingComparator:^NSComparisonResult(ItemCode *obj1, ItemCode *obj2) {
+            return [obj1.jongmokName compare:obj2.jongmokName options:NSCaseInsensitiveSearch];
+        }];
+    
+    [arrayList setArray:tempArray];
+    return arrayList;
 }
 
 - (NSMutableArray*)f_getArrayList:(NSString*)sGubun{
@@ -262,6 +306,7 @@
         tableCount = arrayList.count;
         
         [tableView reloadData];
+        
     }else{
         
     BOOL result = [[ItemMaster Instance] f_SerchText:[edtText text] Gubun:itemGubun];

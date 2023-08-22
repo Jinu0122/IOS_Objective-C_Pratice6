@@ -17,6 +17,7 @@
 		F844741A2A7669B300E0B724 /* ViewItemSerch.m in Sources */ = {isa = PBXBuildFile; fileRef = F84474192A7669B300E0B724 /* ViewItemSerch.m */; };
 		F844741D2A7669D100E0B724 /* ItemMaster.m in Sources */ = {isa = PBXBuildFile; fileRef = F844741C2A7669D100E0B724 /* ItemMaster.m */; };
 		F84474202A7669EA00E0B724 /* ItemCode.m in Sources */ = {isa = PBXBuildFile; fileRef = F844741F2A7669EA00E0B724 /* ItemCode.m */; };
+		F86BCB952A8269CB008C3CA9 /* ViewWaitPopup.m in Sources */ = {isa = PBXBuildFile; fileRef = F86BCB942A8269CB008C3CA9 /* ViewWaitPopup.m */; };
 		F89C0FF62A794C9A00C19F12 /* m_easy_stock.mst in Resources */ = {isa = PBXBuildFile; fileRef = F89C0FF52A794C9A00C19F12 /* m_easy_stock.mst */; };
 /* End PBXBuildFile section */
 
@@ -39,7 +40,9 @@
 		F844741C2A7669D100E0B724 /* ItemMaster.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ItemMaster.m; sourceTree = "<group>"; };
 		F844741E2A7669EA00E0B724 /* ItemCode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ItemCode.h; sourceTree = "<group>"; };
 		F844741F2A7669EA00E0B724 /* ItemCode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ItemCode.m; sourceTree = "<group>"; };
-		F89C0FF52A794C9A00C19F12 /* m_easy_stock.mst */ = {isa = PBXFileReference; lastKnownFileType = file; path = m_easy_stock.mst; sourceTree = SOURCE_ROOT; };
+		F86BCB932A8269CB008C3CA9 /* ViewWaitPopup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewWaitPopup.h; sourceTree = "<group>"; };
+		F86BCB942A8269CB008C3CA9 /* ViewWaitPopup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewWaitPopup.m; sourceTree = "<group>"; };
+		F89C0FF52A794C9A00C19F12 /* m_easy_stock.mst */ = {isa = PBXFileReference; lastKnownFileType = text; path = m_easy_stock.mst; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +87,8 @@
 				F844741C2A7669D100E0B724 /* ItemMaster.m */,
 				F844741E2A7669EA00E0B724 /* ItemCode.h */,
 				F844741F2A7669EA00E0B724 /* ItemCode.m */,
+				F86BCB932A8269CB008C3CA9 /* ViewWaitPopup.h */,
+				F86BCB942A8269CB008C3CA9 /* ViewWaitPopup.m */,
 				F84474082A76697A00E0B724 /* Main.storyboard */,
 				F844740B2A76697A00E0B724 /* Assets.xcassets */,
 				F844740D2A76697A00E0B724 /* LaunchScreen.storyboard */,
@@ -171,6 +176,7 @@
 				F84474202A7669EA00E0B724 /* ItemCode.m in Sources */,
 				F84474122A76697A00E0B724 /* main.m in Sources */,
 				F844741A2A7669B300E0B724 /* ViewItemSerch.m in Sources */,
+				F86BCB952A8269CB008C3CA9 /* ViewWaitPopup.m in Sources */,
 				F84474042A76697A00E0B724 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

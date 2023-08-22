@@ -10,9 +10,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol ViewItemDelegate <NSObject>
+
+- (void)CloseWaitPopup;
+
+@end
+
 @interface ItemMaster : NSObject
 
 + (ItemMaster *) Instance;
+
 - (void) f_GetItemCode;
 - (BOOL) f_SerchText:(NSString*)sText Gubun:(NSString*)sGubun;
 - (NSMutableArray*) f_GetAllCode;
@@ -20,6 +27,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSMutableArray*) f_GetKosdaqCode;
 - (NSMutableArray*) f_GetETNCode;
 - (NSMutableArray*) f_GetSerchCode;
+
+@property ( nonatomic , weak  ) id<ViewItemDelegate> delegate;
 
 @end
 
